@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecureAuth — Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link
+href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #12121a;
+  --surface2: #1a1a26;
+  --border: rgba(255,255,255,0.07);
+  --accent: #6366f1;
+  --accent2: #818cf8;
+  --success: #22c55e;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --text: #e8e8f0;
+  --text2: #9090a8;
+  --text3: #5a5a72;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',sans-serif;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  position:relative;
+}
+
+/* Animated background */
+.bg-grid{
+  position:fixed;inset:0;z-index:0;
+  background-image:
+    linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px);
+  background-size:48px 48px;
+  animation: gridShift 20s linear infinite;
+}
+@keyframes gridShift{ from{transform:translate(0,0)} to{transform:translate(48px,48px)} }
+
+.bg-glow{
+  position:fixed;z-index:0;
+  width:600px;height:600px;
+  background:radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%);
+  border-radius:50%;
+  top:-100px;right:-100px;
+  animation: glowPulse 8s ease-in-out infinite;
+}
+.bg-glow2{
+  position:fixed;z-index:0;
+  width:400px;height:400px;
+  background:radial-gradient(circle, rgba(129,140,248,0.08) 0%, transparent 70%);
+  border-radius:50%;
+  bottom:-80px;left:-80px;
+  animation: glowPulse 10s ease-in-out infinite reverse;
+}
+@keyframes glowPulse{
+  0%,100%{opacity:0.5;transform:scale(1)}
+  50%{opacity:1;transform:scale(1.1)}
+}
+
+/* Main card */
+.card-wrap{
+  position:relative;z-index:1;
+  display:flex;gap:0;
+  width:900px;max-width:calc(100vw - 32px);
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:24px;
+  overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.1);
+  animation: cardIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes cardIn{
+  from{opacity:0;transform:translateY(24px) scale(0.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* Left panel */
+.panel-left{
+  flex:1;
+  background:linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+  padding:56px 48px;
+  display:flex;flex-direction:column;justify-content:space-between;
+  position:relative;overflow:hidden;
+  min-height:500px;
+}
+.panel-left::before{
+  content:'';position:absolute;
+  width:300px;height:300px;
+  background:radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%);
+  top:-80px;right:-80px;border-radius:50%;
+}
+.panel-left::after{
+  content:'';position:absolute;
+  width:200px;height:200px;
+  background:radial-gradient(circle, rgba(52,211,153,0.1) 0%, transparent 70%);
+  bottom:40px;left:-40px;border-radius:50%;
+}
+.brand{
+  display:flex;align-items:center;gap:12px;
+  position:relative;z-index:1;
+}
+.brand-icon{
+  width:40px;height:40px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;box-shadow:0 4px 20px rgba(99,102,241,0.4);
+}
+.brand-name{
+  font-family:'DM Serif Display',serif;
+  font-size:22px;letter-spacing:-0.02em;
+}
+.panel-left-body{position:relative;z-index:1}
+.panel-left-title{
+  font-family:'DM Serif Display',serif;
+  font-size:36px;line-height:1.15;
+  margin-bottom:16px;letter-spacing:-0.02em;
+}
+.panel-left-title em{color:var(--accent2);font-style:italic}
+.panel-left-desc{color:rgba(255,255,255,0.55);font-size:14px;line-height:1.7}
+.features{display:flex;flex-direction:column;gap:10px;margin-top:32px;position:relative;z-index:1}
+.feature-item{
+  display:flex;align-items:center;gap:10px;
+  font-size:13px;color:rgba(255,255,255,0.65);
+}
+.feature-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent2);flex-shrink:0;
+  box-shadow:0 0 6px var(--accent2);
+}
+
+/* Right panel (form) */
+.panel-right{
+  width:400px;flex-shrink:0;
+  padding:48px 40px;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.form-header{margin-bottom:36px}
+.form-eyebrow{
+  font-family:'DM+Mono',monospace;
+  font-size:11px;letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--accent2);margin-bottom:8px;
+}
+.form-title{
+  font-size:26px;font-weight:600;
+  letter-spacing:-0.03em;margin-bottom:6px;
+}
+.form-sub{font-size:13px;color:var(--text2)}
+
+.form-group{margin-bottom:20px}
+label{
+  display:block;font-size:12px;font-weight:500;
+  color:var(--text2);margin-bottom:8px;letter-spacing:0.02em;
+}
+.input-wrap{position:relative}
+input{
+  width:100%;padding:13px 16px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  color:var(--text);font-size:14px;
+  font-family:inherit;
+  transition:all 0.2s;outline:none;
+}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,0.15)}
+input::placeholder{color:var(--text3)}
+.input-icon{
+  position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  color:var(--text3);font-size:16px;cursor:pointer;
+  transition:color 0.2s;user-select:none;
+}
+.input-icon:hover{color:var(--text2)}
+
+.btn{
+  width:100%;padding:14px;
+  background:linear-gradient(135deg,var(--accent),#7c3aed);
+  border:none;border-radius:10px;
+  color:#fff;font-size:14px;font-weight:600;
+  font-family:inherit;cursor:pointer;
+  transition:all 0.2s;
+  position:relative;overflow:hidden;
+  letter-spacing:0.02em;
+  box-shadow:0 4px 20px rgba(99,102,241,0.35);
+}
+.btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.1),transparent);
+  opacity:0;transition:opacity 0.2s;
+}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(99,102,241,0.5)}
+.btn:hover::before{opacity:1}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+
+.btn-spinner{
+  display:inline-block;width:14px;height:14px;
+  border:2px solid rgba(255,255,255,0.3);
+  border-top-color:#fff;border-radius:50%;
+  animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.alert{
+  padding:12px 14px;border-radius:8px;
+  font-size:13px;margin-bottom:20px;
+  display:none;align-items:flex-start;gap:10px;
+  animation:alertIn 0.3s ease;
+}
+@keyframes alertIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.alert.error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:#fca5a5;display:flex}
+.alert.success{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);color:#86efac;display:flex}
+.alert.warning{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);color:#fcd34d;display:flex}
+.alert-icon{flex-shrink:0;margin-top:1px}
+
+.attempt-bar{
+  display:none;margin-top:10px;
+}
+.attempt-bar.show{display:block}
+.attempt-label{font-size:11px;color:var(--text3);margin-bottom:5px}
+.attempt-track{
+  height:3px;background:rgba(255,255,255,0.08);
+  border-radius:2px;overflow:hidden;
+}
+.attempt-fill{
+  height:100%;border-radius:2px;
+  background:var(--warning);
+  transition:width 0.3s ease;
+}
+
+.divider{
+  display:flex;align-items:center;gap:12px;
+  margin:20px 0;color:var(--text3);font-size:12px;
+}
+.divider::before,.divider::after{
+  content:'';flex:1;height:1px;background:var(--border);
+}
+
+.badge-security{
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;color:var(--text3);
+  padding:8px 12px;background:rgba(99,102,241,0.05);
+  border:1px solid rgba(99,102,241,0.1);border-radius:8px;
+  margin-top:24px;
+}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="bg-glow2"></div>
+
+<div class="card-wrap">
+  <!-- Left Panel -->
+  <div class="panel-left">
+    <div class="brand">
+      <div class="brand-icon">🔒</div>
+      <span class="brand-name">SecureAuth</span>
+    </div>
+    <div class="panel-left-body">
+      <h2 class="panel-left-title">Sistem Akses<br><em>Berlapis Keamanan</em></h2>
+      <p class="panel-left-desc">Platform manajemen pengguna dengan JWT, RBAC, dan perlindungan berlapis terhadap ancaman keamanan modern.</p>
+      <div class="features">
+        <div class="feature-item"><span class="feature-dot"></span>JWT Authentication dengan token blacklist</div>
+        <div class="feature-item"><span class="feature-dot"></span>Role-Based Access Control (RBAC)</div>
+        <div class="feature-item"><span class="feature-dot"></span>Proteksi brute force & rate limiting</div>
+        <div class="feature-item"><span class="feature-dot"></span>CSRF protection & secure sessions</div>
+        <div class="feature-item"><span class="feature-dot"></span>Audit log semua aktivitas</div>
+      </div>
+    </div>
+    <div style="position:relative;z-index:1">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:8px;height:8px;background:#22c55e;border-radius:50%;box-shadow:0 0 8px #22c55e;animation:glowPulse 2s infinite"></div>
+        <span style="font-size:12px;color:rgba(255,255,255,0.4)">Sistem aktif & terlindungi</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel (Form) -->
+  <div class="panel-right">
+    <div class="form-header">
+      <div class="form-eyebrow">// Autentikasi</div>
+      <h1 class="form-title">Selamat datang</h1>
+      <p class="form-sub">Masuk ke akun Anda untuk melanjutkan</p>
+    </div>
+
+    <div id="alert" class="alert">
+      <span class="alert-icon" id="alert-icon">⚠️</span>
+      <span id="alert-msg"></span>
+    </div>
+
+    <div>
+      <div class="form-group">
+        <label for="username">USERNAME</label>
+        <div class="input-wrap">
+          <input type="text" id="username" placeholder="Masukkan username" autocomplete="username" maxlength="50">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">PASSWORD</label>
+        <div class="input-wrap">
+          <input type="password" id="password" placeholder="Masukkan password" autocomplete="current-password" maxlength="128">
+          <span class="input-icon" onclick="togglePassword()">👁</span>
+        </div>
+      </div>
+
+      <div class="attempt-bar" id="attempt-bar">
+        <div class="attempt-label">Percobaan login tersisa: <span id="attempts-left">5</span>/5</div>
+        <div class="attempt-track">
+          <div class="attempt-fill" id="attempt-fill" style="width:100%"></div>
+        </div>
+      </div>
+
+      <button class="btn" id="login-btn" onclick="doLogin()">Masuk ke Sistem</button>
+
+      <div class="badge-security">
+        <span>🔒</span>
+        <span>Koneksi terenkripsi · CSRF protected · Rate limited</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://127.0.0.1:5000';
+
+function showAlert(msg, type='error', icon='⚠️'){
+  const el = document.getElementById('alert');
+  el.className = `alert ${type}`;
+  document.getElementById('alert-msg').textContent = msg;
+  document.getElementById('alert-icon').textContent = icon;
+}
+
+function togglePassword(){
+  const inp = document.getElementById('password');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Enter') doLogin();
+});
+
+async function doLogin(){
+  const btn = document.getElementById('login-btn');
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+
+  if(!username || !password){
+    showAlert('Username dan password wajib diisi', 'error', '⚠️');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="btn-spinner"></span> Memverifikasi...';
+
+  try {
+    const res = await fetch(`${API}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+      credentials: 'include'
+    });
+    const data = await res.json();
+
+    if(res.ok){
+      // Simpan token & info user
+      localStorage.setItem('access_token', data.access_token);
+      localStorage.setItem('refresh_token', data.refresh_token);
+      localStorage.setItem('csrf_token', data.csrf_token);
+      localStorage.setItem('session_token', data.session_token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      showAlert('Login berhasil! Mengalihkan...', 'success', '✅');
+      btn.innerHTML = '✅ Berhasil';
+
+      setTimeout(() => { window.location.href = '/dashboard'; }, 800);
+    } else {
+      // Tampilkan sisa percobaan login
+      if(data.attempts_remaining !== undefined){
+        const bar = document.getElementById('attempt-bar');
+        bar.classList.add('show');
+        document.getElementById('attempts-left').textContent = data.attempts_remaining;
+        const pct = (data.attempts_remaining / 5) * 100;
+        document.getElementById('attempt-fill').style.width = pct + '%';
+      }
+
+      const msgMap = {
+        'ACCOUNT_LOCKED': '🔒 Akun dikunci sementara karena terlalu banyak percobaan gagal.',
+        'ACCOUNT_DISABLED': '🚫 Akun dinonaktifkan. Hubungi administrator.',
+        'RATE_LIMIT_EXCEEDED': '⏳ Terlalu banyak percobaan. Tunggu beberapa saat.'
+      };
+      showAlert(msgMap[data.code] || data.error || 'Login gagal',
+          res.status === 429 ? 'warning' : 'error');
+
+      btn.disabled = false;
+      btn.innerHTML = 'Masuk ke Sistem';
+    }
+  } catch(err) {
+    showAlert('Tidak dapat terhubung ke server. Pastikan backend berjalan.', 'error', '🔌');
+    btn.disabled = false;
+    btn.innerHTML = 'Masuk ke Sistem';
+  }
+}
+
+// Redirect jika sudah login
+if(localStorage.getItem('access_token')){
+  window.location.href = '/dashboard';
+}
+</script>
+</body>
+</html>
