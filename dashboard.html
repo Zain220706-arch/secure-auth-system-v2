@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecureAuth — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link
+href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0f;--surface:#12121a;--surface2:#1a1a26;--surface3:#20202e;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.04);
+  --accent:#6366f1;--accent2:#818cf8;--accent3:#c7d2fe;
+  --success:#22c55e;--error:#ef4444;--warning:#f59e0b;--info:#38bdf8;
+  --text:#e8e8f0;--text2:#9090a8;--text3:#5a5a72;
+  --sidebar:220px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;display:flex;min-height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  height:100vh;position:fixed;left:0;top:0;z-index:100;
+}
+.sidebar-brand{
+  padding:24px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.brand-icon{
+  width:34px;height:34px;
+  background:linear-gradient(135deg,var(--accent),#7c3aed);
+  border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:15px;box-shadow:0 4px 12px rgba(99,102,241,0.35);
+}
+.brand-name{font-family:'DM Serif Display',serif;font-size:18px;letter-spacing:-0.02em}
+
+.sidebar-nav{flex:1;padding:16px 12px;overflow-y:auto}
+.nav-section{margin-bottom:24px}
+.nav-label{
+  font-size:10px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--text3);padding:0 8px;margin-bottom:8px;
+  font-family:'DM Mono',monospace;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 10px;border-radius:8px;
+  color:var(--text2);font-size:13px;font-weight:500;
+  cursor:pointer;transition:all 0.15s;margin-bottom:2px;
+}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{
+  background:rgba(99,102,241,0.12);
+  color:var(--accent2);
+  border:1px solid rgba(99,102,241,0.15);
+}
+.nav-icon{font-size:15px;width:20px;text-align:center}
+
+.sidebar-footer{
+  padding:16px 12px;
+  border-top:1px solid var(--border);
+}
+.user-card{
+  display:flex;align-items:center;gap:10px;
+  padding:10px;background:var(--surface2);
+  border-radius:10px;border:1px solid var(--border);
+}
+.user-avatar{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:12px;flex-shrink:0;
+}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-role{
+  font-size:10px;font-family:'DM Mono',monospace;
+  padding:2px 6px;border-radius:4px;margin-top:2px;display:inline-block;
+}
+
+/* MAIN CONTENT */
+.main{
+  margin-left:var(--sidebar);flex:1;
+  display:flex;flex-direction:column;height:100vh;overflow:hidden;
+}
+.topbar{
+  height:56px;flex-shrink:0;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+}
+.page-title{font-size:15px;font-weight:600;letter-spacing:-0.02em}
+.topbar-actions{display:flex;align-items:center;gap:10px}
+.btn-sm{
+  padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;
+  font-family:inherit;cursor:pointer;transition:all 0.15s;border:none;
+  display:flex;align-items:center;gap:6px;
+}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-ghost{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{color:var(--text);background:var(--surface3)}
+.btn-danger{background:rgba(239,68,68,0.15);color:#fca5a5;border:1px solid rgba(239,68,68,0.2)}
+.btn-danger:hover{background:rgba(239,68,68,0.25)}
+.btn-success{background:rgba(34,197,94,0.15);color:#86efac;border:1px solid rgba(34,197,94,0.2)}
+
+.content{flex:1;overflow-y:auto;padding:24px}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:18px;position:relative;overflow:hidden;
+}
+.stat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+}
+.stat-card.indigo::before{background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.stat-card.green::before{background:linear-gradient(90deg,#22c55e,#4ade80)}
+.stat-card.amber::before{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.stat-card.sky::before{background:linear-gradient(90deg,#38bdf8,#7dd3fc)}
+.stat-value{font-size:28px;font-weight:700;letter-spacing:-0.04em;margin-bottom:4px}
+.stat-label{font-size:12px;color:var(--text2)}
+.stat-icon{
+  position:absolute;right:16px;top:50%;transform:translateY(-50%);
+  font-size:28px;opacity:0.15;
+}
+
+/* TABLE */
+.table-wrap{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;overflow:hidden;
+}
+.table-header{
+  padding:18px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+.table-title{font-size:14px;font-weight:600}
+.search-box{
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;padding:7px 12px;
+}
+.search-box input{
+  background:none;border:none;outline:none;
+  font-size:12px;color:var(--text);font-family:inherit;width:160px;
+}
+.search-box input::placeholder{color:var(--text3)}
+table{width:100%;border-collapse:collapse}
+th{
+  padding:12px 16px;font-size:11px;font-weight:600;
+  text-transform:uppercase;letter-spacing:0.08em;
+  color:var(--text3);text-align:left;
+  background:var(--surface2);border-bottom:1px solid var(--border);
+  font-family:'DM Mono',monospace;
+}
+td{
+  padding:13px 16px;font-size:13px;
+  border-bottom:1px solid var(--border2);
+  vertical-align:middle;
+}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,0.015)}
+
+.badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 8px;border-radius:5px;font-size:11px;
+  font-weight:600;font-family:'DM Mono',monospace;
+}
+.badge-superadmin{background:rgba(245,158,11,0.15);color:#fcd34d;border:1px solid rgba(245,158,11,0.2)}
+.badge-admin{background:rgba(99,102,241,0.15);color:var(--accent2);border:1px solid rgba(99,102,241,0.2)}
+.badge-user{background:rgba(148,163,184,0.1);color:#94a3b8;border:1px solid rgba(148,163,184,0.15)}
+.badge-active{background:rgba(34,197,94,0.12);color:#86efac;border:1px solid rgba(34,197,94,0.2)}
+.badge-inactive{background:rgba(239,68,68,0.12);color:#fca5a5;border:1px solid rgba(239,68,68,0.2)}
+.badge-locked{background:rgba(245,158,11,0.12);color:#fcd34d;border:1px solid rgba(245,158,11,0.2)}
+
+.actions{display:flex;gap:6px}
+.btn-icon{
+  width:30px;height:30px;border-radius:6px;border:none;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:13px;transition:all 0.15s;
+}
+.btn-icon.edit{background:rgba(99,102,241,0.12);color:var(--accent2)}
+.btn-icon.edit:hover{background:rgba(99,102,241,0.25)}
+.btn-icon.del{background:rgba(239,68,68,0.1);color:#fca5a5}
+.btn-icon.del:hover{background:rgba(239,68,68,0.2)}
+.btn-icon.pwd{background:rgba(245,158,11,0.1);color:#fcd34d}
+.btn-icon.pwd:hover{background:rgba(245,158,11,0.2)}
+
+/* PANEL TABS */
+.panel-tabs{display:flex;gap:4px;margin-bottom:20px}
+.tab{
+  padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;
+  cursor:pointer;transition:all 0.15s;border:none;font-family:inherit;
+  background:var(--surface2);color:var(--text2);
+  border:1px solid transparent;
+}
+.tab.active{background:rgba(99,102,241,0.12);color:var(--accent2);border-color:rgba(99,102,241,0.2)}
+.tab:hover:not(.active){color:var(--text)}
+
+/* MODAL */
+.modal-overlay{
+  position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:32px;width:440px;max-width:90vw;
+  box-shadow:0 32px 80px rgba(0,0,0,0.6);
+  animation:modalIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes modalIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:6px;letter-spacing:-0.02em}
+.modal-sub{font-size:13px;color:var(--text2);margin-bottom:24px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:7px;letter-spacing:0.05em;text-transform:uppercase}
+.form-group input,.form-group select{
+  width:100%;padding:11px 13px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;
+  outline:none;transition:border-color 0.2s;
+}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent)}
+.form-group select option{background:var(--surface2)}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+.btn-modal{
+  padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;
+  font-family:inherit;cursor:pointer;transition:all 0.15s;border:none;
+}
+.btn-modal-primary{background:var(--accent);color:#fff}
+.btn-modal-primary:hover{background:var(--accent2)}
+.btn-modal-cancel{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+.btn-modal-cancel:hover{color:var(--text)}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{
+  padding:12px 16px;border-radius:10px;font-size:13px;font-weight:500;
+  display:flex;align-items:center;gap:10px;min-width:260px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.4);pointer-events:all;
+  animation:toastIn 0.3s ease;
+}
+@keyframes toastIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+.toast.success{background:#1a2e1a;border:1px solid rgba(34,197,94,0.3);color:#86efac}
+.toast.error{background:#2e1a1a;border:1px solid rgba(239,68,68,0.3);color:#fca5a5}
+.toast.info{background:#1a1e2e;border:1px solid rgba(99,102,241,0.3);color:var(--accent3)}
+
+/* AUDIT LOG */
+.log-item{
+  padding:12px 20px;border-bottom:1px solid var(--border2);
+  display:flex;align-items:flex-start;gap:12px;
+  transition:background 0.15s;font-size:12px;
+}
+.log-item:hover{background:rgba(255,255,255,0.02)}
+.log-dot{
+  width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px;
+}
+.log-dot.success{background:var(--success);box-shadow:0 0 6px var(--success)}
+.log-dot.failed{background:var(--error);box-shadow:0 0 6px var(--error)}
+.log-dot.blocked{background:var(--warning);box-shadow:0 0 6px var(--warning)}
+.log-action{font-weight:600;color:var(--text);margin-bottom:2px}
+.log-meta{color:var(--text3)}
+
+/* Permission chips */
+.perm-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.perm-chip{
+  padding:2px 8px;border-radius:4px;font-size:10px;
+  font-family:'DM Mono',monospace;
+  background:rgba(99,102,241,0.1);color:var(--accent2);
+  border:1px solid rgba(99,102,241,0.15);
+}
+
+/* OAuth2 info panel */
+.info-card{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:16px;margin-bottom:12px;
+}
+.info-card-title{font-size:13px;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.info-card-desc{font-size:12px;color:var(--text2);line-height:1.6}
+
+/* Loading */
+.loading{
+  display:flex;align-items:center;justify-content:center;
+  padding:60px;color:var(--text3);gap:10px;
+}
+.spin{animation:spin 0.7s linear infinite;font-size:20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Permission denied */
+.no-perm{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:80px 20px;text-align:center;
+}
+.no-perm-icon{font-size:48px;margin-bottom:16px;opacity:0.4}
+.no-perm-title{font-size:16px;font-weight:600;margin-bottom:8px}
+.no-perm-desc{font-size:13px;color:var(--text3)}
+
+/* Responsive */
+@media(max-width:768px){
+  :root{--sidebar:0px}
+  .sidebar{display:none}
+  .stats-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">🔒</div>
+    <span class="brand-name">SecureAuth</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-label">Utama</div>
+      <div class="nav-item active" onclick="showSection('overview')" id="nav-overview">
+        <span class="nav-icon">📊</span> Overview
+      </div>
+      <div class="nav-item" onclick="showSection('users')" id="nav-users">
+        <span class="nav-icon">👥</span> Manajemen User
+      </div>
+      <div class="nav-item" onclick="showSection('logs')" id="nav-logs">
+        <span class="nav-icon">📋</span> Audit Log
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Edukasi</div>
+      <div class="nav-item" onclick="showSection('security')" id="nav-security">
+        <span class="nav-icon">🛡️</span> Security Concepts
+      </div>
+      <div class="nav-item" onclick="showSection('oauth')" id="nav-oauth">
+        <span class="nav-icon">🔑</span> OAuth2 & RBAC
+      </div>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar" id="user-avatar" style="background:linear-gradient(135deg,var(--accent),#7c3aed);color:#fff">?</div>
+      <div class="user-info">
+        <div class="user-name" id="user-display-name">Loading...</div>
+        <span class="user-role" id="user-role-badge">—</span>
+      </div>
+    </div>
+    <button class="btn-sm btn-ghost" style="width:100%;margin-top:8px;justify-content:center" onclick="doLogout()">
+      🚪 Logout
+    </button>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <div class="page-title" id="page-title">📊 Overview</div>
+    <div class="topbar-actions">
+      <div id="topbar-actions-slot"></div>
+    </div>
+  </div>
+  <div class="content" id="content">
+    <div class="loading"><span class="spin">⟳</span> Memuat...</div>
+  </div>
+</div>
+
+<!-- Modal: Tambah/Edit User -->
+<div class="modal-overlay" id="modal-user">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Tambah User</div>
+    <div class="modal-sub" id="modal-sub">Isi informasi pengguna baru</div>
+    <div id="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="m-username" placeholder="username" maxlength="50">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="m-email" placeholder="email@domain.com">
+        </div>
+      </div>
+      <div class="form-group" id="m-pw-wrap">
+        <label>Password</label>
+        <input type="password" id="m-password" placeholder="Min 8 karakter, huruf besar, angka, simbol">
+      </div>
+      <div class="form-group">
+        <label>Role</label>
+        <select id="m-role">
+          <option value="3">👤 User</option>
+          <option value="2">🛡️ Admin</option>
+          <option value="1">⚡ SuperAdmin</option>
+        </select>
+      </div>
+      <div class="form-group" id="m-active-wrap" style="display:none">
+        <label>Status</label>
+        <select id="m-active">
+          <option value="true">☑️ Aktif</option>
+          <option value="false">🚫 Nonaktif</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal btn-modal-cancel" onclick="closeModal('modal-user')">Batal</button>
+      <button class="btn-modal btn-modal-primary" id="modal-save-btn" onclick="saveUser()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Ganti Password -->
+<div class="modal-overlay" id="modal-pwd">
+  <div class="modal">
+    <div class="modal-title">Ganti Password</div>
+    <div class="modal-sub">Password akan di-hash dengan bcrypt (cost factor 12)</div>
+    <div class="form-group">
+      <label>Password Baru</label>
+      <input type="password" id="new-password" placeholder="Min 8 karakter, huruf besar, angka, simbol">
+    </div>
+    <div class="form-group">
+      <label>Konfirmasi Password</label>
+      <input type="password" id="confirm-password" placeholder="Ulangi password baru">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal btn-modal-cancel" onclick="closeModal('modal-pwd')">Batal</button>
+      <button class="btn-modal btn-modal-primary" onclick="savePassword()">Ganti Password</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+const API = 'http://127.0.0.1:5000';
+let currentUser = null;
+let allUsers = [];
+let editingUserId = null;
+let passwordUserId = null;
+
+// —————— Auth Guard ———————————————————————
+function getToken(){ return localStorage.getItem('access_token') }
+function getCsrf(){ return localStorage.getItem('csrf_token') }
+
+async function apiFetch(path, opts={}){
+  const token = getToken();
+  const headers = { 'Content-Type':'application/json', ...(opts.headers||{}) };
+  if(token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(API + path, { ...opts, headers, credentials:'include' });
+
+  if(res.status === 401){
+    // Token expired — try refresh
+    const refreshed = await tryRefresh();
+    if(refreshed){
+      headers['Authorization'] = `Bearer ${getToken()}`;
+      return fetch(API + path, { ...opts, headers, credentials:'include' });
+    } else {
+      logout();
+      return res;
+    }
+  }
+  return res;
+}
+
+async function tryRefresh(){
+  const rt = localStorage.getItem('refresh_token');
+  if(!rt) return false;
+  try{
+    const res = await fetch(`${API}/api/auth/refresh`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({refresh_token: rt})
+    });
+    if(res.ok){
+      const d = await res.json();
+      localStorage.setItem('access_token', d.access_token);
+      localStorage.setItem('refresh_token', d.refresh_token);
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+
+function logout(){
+  localStorage.clear();
+  window.location.href = '/';
+}
+
+async function doLogout(){
+  try{
+    await apiFetch('/api/auth/logout',{method:'POST'});
+  }catch(e){}
+  logout();
+}
+
+// —————— Init ————————————————————————
+window.addEventListener('load', async ()=>{
+  if(!getToken()){ window.location.href='/'; return; }
+
+  try{
+    const res = await apiFetch('/api/profile');
+    if(!res.ok){ logout(); return; }
+    currentUser = await res.json();
+
+    const stored = localStorage.getItem('user');
+    if(stored) currentUser = {...JSON.parse(stored), ...currentUser};
+
+    initSidebar();
+    showSection('overview');
+  }catch(e){
+    showToast('Gagal memuat profil', 'error');
+    logout();
+  }
+});
+
+function initSidebar(){
+  const initials = (currentUser.username||'?').slice(0,2).toUpperCase();
+  document.getElementById('user-avatar').textContent = initials;
+  document.getElementById('user-display-name').textContent = currentUser.username;
+
+  const roleMap = {
+    superadmin:['⚡ SuperAdmin','background:rgba(245,158,11,0.15);color:#fcd34d'],
+    admin:['🛡️ Admin','background:rgba(99,102,241,0.15);color:var(--accent2)'],
+    user:['👤 User','background:rgba(148,163,184,0.1);color:#94a3b8']
+  };
+  const [label, style] = roleMap[currentUser.role_name || currentUser.role] || ['Unknown',''];
+  const badge = document.getElementById('user-role-badge');
+  badge.textContent = label;
+  badge.setAttribute('style', style);
+
+  // Hide admin nav for regular users
+  const perms = currentUser.role_permissions || currentUser.permissions || [];
+  if(!perms.includes('user:read')){
+    document.getElementById('nav-users').style.display = 'none';
+    document.getElementById('nav-logs').style.display = 'none';
+  }
+}
+
+// —————— Navigation —————————————————————
+const sectionTitles = {
+  overview:'📊 Overview', users:'👥 Manajemen User',
+  logs:'📋 Audit Log', security:'🛡️ Security Concepts', oauth:'🔑 OAuth2 & RBAC'
+};
+
+function showSection(name){
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  const nav = document.getElementById('nav-'+name);
+  if(nav) nav.classList.add('active');
+  document.getElementById('page-title').textContent = sectionTitles[name]||name;
+  document.getElementById('topbar-actions-slot').innerHTML = '';
+
+  const fns = {overview:renderOverview, users:renderUsers, logs:renderLogs, security:renderSecurity, oauth:renderOAuth};
+  if(fns[name]) fns[name]();
+}
+
+// —————— OVERVIEW —————————————————————
+async function renderOverview(){
+  const content = document.getElementById('content');
+  const perms = currentUser.role_permissions || currentUser.permissions || [];
+
+  let statsHtml = '';
+  let usersData = [];
+
+  if(perms.includes('user:read')){
+    try{
+      const res = await apiFetch('/api/users');
+      if(res.ok){
+        const d = await res.json();
+        usersData = d.users;
+        allUsers = usersData;
+        const total = usersData.length;
+        const active = usersData.filter(u=>u.is_active).length;
+        const admins = usersData.filter(u=>u.role_name==='admin'||u.role_name==='superadmin').length;
+        const locked = usersData.filter(u=>u.locked_until).length;
+
+        statsHtml = `
+        <div class="stats-grid">
+          <div class="stat-card indigo">
+            <div class="stat-value">${total}</div>
+            <div class="stat-label">Total Pengguna</div>
+            <div class="stat-icon">👥</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-value">${active}</div>
+            <div class="stat-label">Pengguna Aktif</div>
+            <div class="stat-icon">☑️</div>
+          </div>
+          <div class="stat-card amber">
+            <div class="stat-value">${admins}</div>
+            <div class="stat-label">Administrator</div>
+            <div class="stat-icon">🛡️</div>
+          </div>
+          <div class="stat-card sky">
+            <div class="stat-value">${locked}</div>
+            <div class="stat-label">Akun Terkunci</div>
+            <div class="stat-icon">🔒</div>
+          </div>
+        </div>`;
+      }
+    }catch(e){}
+  }
+
+  const permsDisplay = (currentUser.role_permissions||currentUser.permissions||[])
+    .map(p=>`<span class="perm-chip">${p}</span>`).join('');
+
+  content.innerHTML = `
+  ${statsHtml}
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="table-wrap">
+      <div class="table-header"><div class="table-title">👤 Profil Anda</div></div>
+      <div style="padding:20px">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+          <div style="width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#7c3aed);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;flex-shrink:0">
+            ${(currentUser.username||'?').slice(0,2).toUpperCase()}
+          </div>
+          <div>
+            <div style="font-size:16px;font-weight:700">${currentUser.username}</div>
+            <div style="font-size:12px;color:var(--text2)">${currentUser.email||'—'}</div>
+          </div>
+        </div>
+        <table style="width:100%">
+          <tr><td style="padding:6px 0;color:var(--text2);font-size:12px;width:110px">Role</td>
+          <td style="padding:6px 0;font-size:12px;font-weight:600">${currentUser.role_name||currentUser.role||'—'}</td></tr>
+          <tr><td style="padding:6px 0;color:var(--text2);font-size:12px">Status</td>
+          <td style="padding:6px 0"><span class="badge badge-active" style="font-size:11px">● Aktif</span></td></tr>
+          <tr><td style="padding:6px 0;color:var(--text2);font-size:12px">Last Login</td>
+          <td style="padding:6px 0;font-size:12px">${currentUser.last_login ? new Date(currentUser.last_login).toLocaleString('id-ID') : '—'}</td></tr>
+        </table>
+        <div style="margin-top:14px">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.08em">Permissions</div>
+          <div class="perm-wrap">${permsDisplay || '<span style="color:var(--text3);font-size:12px">Tidak ada permission</span>'}</div>
+        </div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-header"><div class="table-title">🔑 Token JWT Aktif</div></div>
+      <div style="padding:20px">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-family:'DM Mono',monospace">ACCESS TOKEN (truncated)</div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);word-break:break-all;line-height:1.6;max-height:100px;overflow:hidden">
+          ${(getToken()||'').slice(0,180)}...
+        </div>
+        <div style="margin-top:14px;font-size:11px;color:var(--text3);margin-bottom:8px;font-family:'DM Mono',monospace">CSRF TOKEN</div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;font-family:'DM Mono',monospace;font-size:10px;color:#fcd34d;word-break:break-all">
+          ${(getCsrf()||'—').slice(0,64)}
+        </div>
+        <div style="margin-top:14px;font-size:12px;color:var(--text2);line-height:1.6">
+          ☑️ Token disimpan di <b>localStorage</b> — Dalam produksi gunakan HttpOnly cookie<br>
+          ☑️ CSRF token regenerated setiap sesi<br>
+          ☑️ Token di-blacklist saat logout
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// —————— USERS ——————————————————————
+async function renderUsers(){
+  const content = document.getElementById('content');
+  const perms = currentUser.role_permissions || currentUser.permissions || [];
+
+  if(!perms.includes('user:read')){
+    content.innerHTML = `<div class="no-perm"><div class="no-perm-icon">🚫</div><div class="no-perm-title">Akses Ditolak</div><div class="no-perm-desc">Role Anda tidak memiliki permission <code>user:read</code></div></div>`;
+    return;
+  }
+
+  if(perms.includes('user:write')){
+    document.getElementById('topbar-actions-slot').innerHTML = `
+      <button class="btn-sm btn-primary" onclick="openAddUser()">+ Tambah User</button>`;
+  }
+
+  content.innerHTML = `<div class="loading"><span class="spin">⟳</span> Memuat data user...</div>`;
+
+  try{
+    const res = await apiFetch('/api/users');
+    if(!res.ok){ content.innerHTML='<div class="no-perm"><div class="no-perm-icon">⚠️</div><div class="no-perm-title">Gagal memuat data</div></div>'; return; }
+    const d = await res.json();
+    allUsers = d.users;
+    renderUsersTable(allUsers, perms);
+  }catch(e){
+    content.innerHTML='<div class="no-perm"><div class="no-perm-icon">🔌</div><div class="no-perm-title">Koneksi gagal</div><div class="no-perm-desc">Pastikan backend Flask berjalan di port 5000</div></div>';
+  }
+}
+
+function renderUsersTable(users, perms){
+  const content = document.getElementById('content');
+  const canWrite = perms.includes('user:write');
+  const canDelete = perms.includes('user:delete');
+  const rows = users.map(u => {
+    const roleBadge = {superadmin:'badge-superadmin',admin:'badge-admin',user:'badge-user'}[u.role_name]||'badge-user';
+    const statusBadge = !u.is_active ? 'badge-inactive" title="Nonaktif">🚫 Nonaktif'
+      : u.locked_until ? `badge-locked" title="Terkunci">🔒 Terkunci`
+      : 'badge-active">● Aktif';
+    const lastLogin = u.last_login ? new Date(u.last_login).toLocaleDateString('id-ID') : '—';
+    const actions = (canWrite||canDelete) ? `
+      <div class="actions">
+      ${canWrite?`<button class="btn-icon edit" onclick="openEditUser(${u.id})" title="Edit">✏️</button>`:''}
+      ${canWrite?`<button class="btn-icon pwd" onclick="openPwd(${u.id})" title="Ganti Password">🔑</button>`:''}
+      ${canDelete&&u.id!==currentUser.id?`<button class="btn-icon del" onclick="confirmDelete(${u.id},'${u.username}')" title="Hapus">🗑️</button>`:''}
+    </div>` : '—';
+
+    return `<tr>
+      <td><div style="font-weight:600;font-size:13px">${u.username}</div><div style="font-size:11px;color:var(--text3)">${u.email}</div></td>
+      <td><span class="badge ${roleBadge}">${u.role_name}</span></td>
+      <td><span class="badge ${statusBadge}</span></td>
+      <td style="font-size:12px;color:var(--text2)">${lastLogin}</td>
+      <td style="font-size:12px;color:var(--text3);font-family:'DM Mono',monospace">${u.last_login_ip||'—'}</td>
+      <td>${actions}</td>
+    </tr>`;
+  }).join('');
+
+  content.innerHTML = `
+    <div class="table-wrap">
+      <div class="table-header">
+        <div class="table-title">👥 Daftar Pengguna <span style="color:var(--text3);font-weight:400">(${users.length})</span></div>
+        <div class="search-box">
+          <span style="color:var(--text3)">🔍</span>
+          <input type="text" placeholder="Cari username / email..." oninput="filterUsers(this.value)">
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr>
+            <th>PENGGUNA</th><th>ROLE</th><th>STATUS</th>
+            <th>LAST LOGIN</th><th>IP TERAKHIR</th><th>AKSI</th>
+          </tr></thead>
+          <tbody id="users-tbody">${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function filterUsers(q){
+  const filtered = allUsers.filter(u =>
+    u.username.toLowerCase().includes(q.toLowerCase()) ||
+    u.email.toLowerCase().includes(q.toLowerCase())
+  );
+  const perms = currentUser.role_permissions||currentUser.permissions||[];
+  const canWrite = perms.includes('user:write'), canDelete = perms.includes('user:delete');
+  const tbody = document.getElementById('users-tbody');
+  if(!tbody) return;
+
+  tbody.innerHTML = filtered.map(u => {
+    const roleBadge = {superadmin:'badge-superadmin',admin:'badge-admin',user:'badge-user'}[u.role_name]||'badge-user';
+    const statusBadge = !u.is_active ? 'badge-inactive">🚫 Nonaktif'
+      : u.locked_until ? 'badge-locked">🔒 Terkunci' : 'badge-active">● Aktif';
+    const lastLogin = u.last_login ? new Date(u.last_login).toLocaleDateString('id-ID') : '—';
+    const actions = (canWrite||canDelete) ? `
+      <div class="actions">
+      ${canWrite?`<button class="btn-icon edit" onclick="openEditUser(${u.id})" title="Edit">✏️</button>`:''}
+      ${canWrite?`<button class="btn-icon pwd" onclick="openPwd(${u.id})" title="Ganti Password">🔑</button>`:''}
+      ${canDelete&&u.id!==currentUser.id?`<button class="btn-icon del" onclick="confirmDelete(${u.id},'${u.username}')" title="Hapus">🗑️</button>`:''}
+    </div>` : '—';
+    return `<tr>
+      <td><div style="font-weight:600;font-size:13px">${u.username}</div><div style="font-size:11px;color:var(--text3)">${u.email}</div></td>
+      <td><span class="badge ${roleBadge}">${u.role_name}</span></td>
+      <td><span class="badge ${statusBadge}</span></td>
+      <td style="font-size:12px;color:var(--text2)">${lastLogin}</td>
+      <td style="font-size:12px;color:var(--text3);font-family:'DM Mono',monospace">${u.last_login_ip||'—'}</td>
+      <td>${actions}</td>
+    </tr>`;
+  }).join('');
+}
+
+// —————— MODAL: ADD / EDIT USER ——————————————————
+function openAddUser(){
+  editingUserId = null;
+  document.getElementById('modal-title').textContent = 'Tambah User Baru';
+  document.getElementById('modal-sub').textContent = 'Password akan di-hash bcrypt cost 12';
+  document.getElementById('m-username').value = '';
+  document.getElementById('m-username').disabled = false;
+  document.getElementById('m-email').value = '';
+  document.getElementById('m-password').value = '';
+  document.getElementById('m-role').value = '3';
+  document.getElementById('m-pw-wrap').style.display = 'block';
+  document.getElementById('m-active-wrap').style.display = 'none';
+  document.getElementById('modal-save-btn').textContent = 'Buat User';
+  document.getElementById('modal-user').classList.add('open');
+}
+
+function openEditUser(userId){
+  const user = allUsers.find(u=>u.id===userId);
+  if(!user) return;
+  editingUserId = userId;
+  document.getElementById('modal-title').textContent = `Edit User: ${user.username}`;
+  document.getElementById('modal-sub').textContent = 'Kosongkan password jika tidak ingin mengubah';
+  document.getElementById('m-username').value = user.username;
+  document.getElementById('m-username').disabled = true;
+  document.getElementById('m-email').value = user.email;
+  document.getElementById('m-password').value = '';
+  const roleMap = {superadmin:'1',admin:'2',user:'3'};
+  document.getElementById('m-role').value = roleMap[user.role_name]||'3';
+  document.getElementById('m-pw-wrap').style.display = 'none';
+  document.getElementById('m-active-wrap').style.display = 'block';
+  document.getElementById('m-active').value = user.is_active ? 'true' : 'false';
+  document.getElementById('modal-save-btn').textContent = 'Simpan Perubahan';
+  document.getElementById('modal-user').classList.add('open');
+}
+
+async function saveUser(){
+  const btn = document.getElementById('modal-save-btn');
+  btn.disabled = true; btn.textContent = '⟳ Menyimpan...';
+
+  try{
+    if(editingUserId){
+      const body = {
+        email: document.getElementById('m-email').value,
+        role_id: parseInt(document.getElementById('m-role').value),
+        is_active: document.getElementById('m-active').value === 'true'
+      };
+      const res = await apiFetch(`/api/users/${editingUserId}`, {method:'PUT', body:JSON.stringify(body)});
+      const d = await res.json();
+      if(res.ok){ showToast('☑️ User berhasil diupdate','success'); closeModal('modal-user'); renderUsers(); }
+      else showToast('✖ ' + d.error, 'error');
+    } else {
+      const body = {
+        username: document.getElementById('m-username').value,
+        email: document.getElementById('m-email').value,
+        password: document.getElementById('m-password').value,
+        role_id: parseInt(document.getElementById('m-role').value)
+      };
+      const res = await apiFetch('/api/users', {method:'POST', body:JSON.stringify(body)});
+      const d = await res.json();
+      if(res.ok){ showToast('☑️ User berhasil dibuat','success'); closeModal('modal-user'); renderUsers(); }
+      else showToast('✖ ' + d.error, 'error');
+    }
+  }catch(e){ showToast('✖ Gagal menghubungi server','error'); }
+  btn.disabled=false; btn.textContent = editingUserId ? 'Simpan Perubahan':'Buat User';
+}
+
+// —————— MODAL: CHANGE PASSWORD ——————————————————
+function openPwd(userId){
+  passwordUserId = userId;
+  document.getElementById('new-password').value='';
+  document.getElementById('confirm-password').value='';
+  document.getElementById('modal-pwd').classList.add('open');
+}
+
+async function savePassword(){
+  const np = document.getElementById('new-password').value;
+  const cp = document.getElementById('confirm-password').value;
+  if(np !== cp){ showToast('✖ Password tidak cocok','error'); return; }
+
+  try{
+    const res = await apiFetch(`/api/users/${passwordUserId}/change-password`,{
+      method:'POST', body:JSON.stringify({new_password:np})
+    });
+    const d = await res.json();
+    if(res.ok){ showToast('☑️ Password berhasil diubah','success'); closeModal('modal-pwd'); }
+    else showToast('✖ ' + d.error, 'error');
+  }catch(e){ showToast('✖ Gagal','error'); }
+}
+
+async function confirmDelete(userId, username){
+  if(!confirm(`Hapus user "${username}"? Tindakan ini tidak dapat dibatalkan.`)) return;
+  try{
+    const res = await apiFetch(`/api/users/${userId}`, {method:'DELETE'});
+    const d = await res.json();
+    if(res.ok){ showToast(`☑️ User "${username}" dihapus`,'success'); renderUsers(); }
+    else showToast('✖ ' + d.error,'error');
+  }catch(e){ showToast('✖ Gagal menghubungi server','error'); }
+}
+
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if(e.target === o) o.classList.remove('open'); });
+});
+
+// —————— AUDIT LOGS ——————————————————————
+async function renderLogs(){
+  const content = document.getElementById('content');
+  const perms = currentUser.role_permissions||currentUser.permissions||[];
+
+  if(!perms.includes('log:read')){
+    content.innerHTML=`<div class="no-perm"><div class="no-perm-icon">🚫</div><div class="no-perm-title">Akses Ditolak</div><div class="no-perm-desc">Permission <code>log:read</code> diperlukan</div></div>`;
+    return;
+  }
+
+  content.innerHTML = `<div class="loading"><span class="spin">⟳</span> Memuat audit log...</div>`;
+
+  try{
+    const res = await apiFetch('/api/audit-logs?limit=50');
+    if(!res.ok){ content.innerHTML='<div class="no-perm"><div class="no-perm-icon">⚠️</div><div class="no-perm-title">Gagal memuat log</div></div>'; return; }
+    const d = await res.json();
+
+    const logItems = d.logs.map(log => {
+      const dotClass = {success:'success',failed:'failed',blocked:'blocked'}[log.status]||'failed';
+      const time = new Date(log.created_at).toLocaleString('id-ID');
+      return `<div class="log-item">
+        <div class="log-dot ${dotClass}"></div>
+        <div style="flex:1">
+          <div class="log-action">${log.action} <span style="color:var(--text3);font-weight:400;font-family:'DM Mono',monospace;font-size:11px">[${log.status.toUpperCase()}]</span></div>
+          <div class="log-meta">${log.username||'anon'} · ${log.ip_address||'—'} · ${time}</div>
+        </div>
+      </div>`;
+    }).join('') || '<div style="padding:40px;text-align:center;color:var(--text3)">Belum ada log</div>';
+
+    content.innerHTML = `
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title">📋 Audit Log <span style="color:var(--text3);font-weight:400">(${d.total} entri terbaru)</span></div>
+        </div>
+        ${logItems}
+      </div>`;
+  }catch(e){
+    content.innerHTML='<div class="no-perm"><div class="no-perm-icon">🔌</div><div class="no-perm-title">Koneksi gagal</div></div>';
+  }
+}
+
+// —————— SECURITY CONCEPTS ———————————————————
+function renderSecurity(){
+  document.getElementById('content').innerHTML = `
+    <div style="max-width:800px">
+      <h2 style="font-size:20px;font-weight:700;margin-bottom:6px;letter-spacing:-0.02em">🛡️ Konsep Keamanan yang Diimplementasikan</h2>
+      <p style="color:var(--text2);font-size:13px;margin-bottom:24px">Sistem ini mengimplementasikan berbagai lapisan keamanan autentikasi modern</p>
+
+      <div class="info-card">
+        <div class="info-card-title">🔐 JWT Authentication (PyJWT)</div>
+        <div class="info-card-desc">
+          Token JWT terdiri dari <b>Header</b> (algoritma), <b>Payload</b> (klaim: sub, iat, exp, jti, role, permissions), dan <b>Signature</b> (HMAC-SHA256).<br>
+          <b>Token Blacklist:</b> Setiap JTI (JWT ID) disimpan di database. Saat logout, token direvoke sehingga tidak bisa digunakan kembali walau belum expired.<br>
+          <b>Refresh Token:</b> Access token berumur pendek (1 jam). Refresh token digunakan untuk mendapatkan access token baru tanpa login ulang.
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-title">👥 RBAC dengan Python Decorator</div>
+        <div class="info-card-desc">
+          <b>@token_required</b> — Decorator yang memvalidasi JWT pada setiap endpoint protected.<br>
+          <b>@require_permission('user:write')</b> — Decorator RBAC yang memeriksa permission spesifik.<br>
+          <b>@require_roles('admin','superadmin')</b> — Decorator yang memeriksa role pengguna.<br>
+          Hierarchy: <code>superadmin ⊃ admin ⊃ user</code> — setiap role memiliki permission berbeda (least privilege).
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-title">🛡️ Proteksi Brute Force</div>
+        <div class="info-card-desc">
+          <b>Rate Limiting:</b> Flask-Limiter membatasi 10 request login per menit per IP.<br>
+          <b>Account Lockout:</b> Akun dikunci 15 menit setelah 5 percobaan gagal berturut-turut.<br>
+          <b>Generic Error:</b> Pesan error yang sama untuk "username salah" dan "password salah" mencegah <i>user enumeration attack</i>.<br>
+          <b>Timing-safe:</b> Verifikasi password menggunakan bcrypt.checkpw() yang aman dari timing attack.
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-title">🔐 CSRF Protection</div>
+        <div class="info-card-desc">
+          Server membuat CSRF token unik (64-byte hex via secrets.token_hex) untuk setiap sesi.<br>
+          <b>Double Submit Cookie Pattern:</b> Token dikirim via response body dan disimpan di localStorage. Setiap mutasi (POST/PUT/DELETE) harus menyertakan token di header.<br>
+          <b>SameSite=Strict:</b> Session cookie menggunakan SameSite=Strict mencegah cross-site request.
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-title">🕵️ Session Hijacking Prevention</div>
+        <div class="info-card-desc">
+          Session token adalah 128-karakter hex (cryptographically random via secrets.token_hex(64)).<br>
+          Token di-hash dengan SHA-256 sebelum disimpan di database — jika DB bocor, attacker tidak dapat menggunakan token.<br>
+          <b>HttpOnly Cookie:</b> Session cookie dengan flag HttpOnly mencegah akses JavaScript (XSS protection).<br>
+          Sesi memiliki expiry dan dapat di-invalidate secara server-side.
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-title">🔒 Keamanan Password</div>
+        <div class="info-card-desc">
+          <b>bcrypt</b> dengan cost factor 12 (sekitar 300ms hash time) — mempersulit offline brute force.<br>
+          Validasi kekuatan: min 8 karakter, huruf besar/kecil, angka, dan karakter spesial.<br>
+          <b>Parameterized Query</b> digunakan di semua query SQL untuk mencegah SQL Injection.<br>
+          Security headers: X-Frame-Options, CSP, X-Content-Type-Options ditambahkan di setiap response.
+        </div>
+      </div>
+    </div>`;
+}
+
+// —————— OAUTH2 & RBAC INFO ————————————————————
+async function renderOAuth(){
+  try{
+    const res = await apiFetch('/api/oauth2/info');
+    const d = await res.json();
+
+    const grantTypes = d.grant_types.map(g=>`
+      <div class="info-card">
+        <div class="info-card-title" style="font-family:'DM Mono',monospace">${g.type}</div>
+        <div class="info-card-desc">${g.use_case}</div>
+      </div>`).join('');
+
+    const scopes = Object.entries(d.scopes_example).map(([k,v])=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border2)">
+        <span class="perm-chip">${k}</span>
+        <span style="font-size:12px;color:var(--text2)">${v}</span>
+      </div>`).join('');
+
+    document.getElementById('content').innerHTML = `
+      <div style="max-width:800px">
+        <h2 style="font-size:20px;font-weight:700;margin-bottom:6px;letter-spacing:-0.02em">🔑 OAuth2 & Prinsip Least Privilege</h2>
+        <p style="color:var(--text2);font-size:13px;margin-bottom:24px">${d.description}</p>
+
+        <h3 style="font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text2)">Grant Types</h3>
+        ${grantTypes}
+
+        <h3 style="font-size:14px;font-weight:600;margin:20px 0 12px;color:var(--text2)">Contoh Scope (Least Privilege)</h3>
+        <div class="table-wrap" style="padding:4px 16px">
+          ${scopes}
+        </div>
+
+        <div class="info-card" style="margin-top:16px;border-color:rgba(99,102,241,0.2)">
+          <div class="info-card-title">⚡ Prinsip Least Privilege di Sistem Ini</div>
+          <div class="info-card-desc">
+            <b>User:</b> Hanya bisa baca/edit profil sendiri — tidak bisa lihat user lain.<br>
+            <b>Admin:</b> Bisa manage user, tidak bisa hapus role superadmin atau kelola sistem.<br>
+            <b>SuperAdmin:</b> Akses penuh termasuk assign role superadmin ke user lain.<br><br>
+            Setiap decorator <code>@require_permission</code> memeriksa apakah JWT payload berisi permission spesifik. Permission diambil dari database saat login dan di-embed langsung ke dalam token — tanpa query DB tambahan di setiap request.
+          </div>
+        </div>
+
+        <div class="info-card" style="margin-top:12px">
+          <div class="info-card-title">📐 Arsitektur Permission di Sistem Ini</div>
+          <div class="info-card-desc" style="font-family:'DM Mono',monospace;font-size:12px;line-height:2">
+            superadmin: user:read, user:write, user:delete, role:read, role:write, role:delete, log:read, system:manage<br>
+            admin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: user:read, user:write, user:delete, role:read, log:read<br>
+            user&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: profile:read, profile:write
+          </div>
+        </div>
+      </div>`;
+  }catch(e){
+    document.getElementById('content').innerHTML = '<div class="no-perm"><div class="no-perm-icon">🔌</div><div class="no-perm-title">Gagal memuat</div></div>';
+  }
+}
+
+// —————— TOAST —————————————————————————
+function showToast(msg, type='info'){
+  const wrap = document.getElementById('toast-wrap');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = msg;
+  wrap.appendChild(toast);
+  setTimeout(()=>{ toast.style.opacity='0'; toast.style.transform='translateX(16px)'; toast.style.transition='all 0.3s'; setTimeout(()=>toast.remove(), 300); }, 3000);
+}
+</script>
+</body>
+</html>
